@@ -24,12 +24,12 @@ def clean(path, dest):
     # m = { 'movie title' : [ [ 'title', path ] ] } -
     m = {}
     s = set()
+    print('Guessing titles, episode names etc....')
     for root, dirs, files in os.walk(path):
         for file in files:
             if file.endswith(".avi") or file.endswith('.mp4') or file.endswith('.mkv') or file.endswith('.mpeg4') or file.endswith('.m4v'):
                 f = os.path.join(root, file)
                 d = guessit(f)
-                print(d['title'])
                 if d['type'] == 'movie':
                     m.setdefault((d['title']).title(), []).append(f)
                 elif d['type'] == 'episode':
@@ -39,9 +39,10 @@ def clean(path, dest):
                         else:
                             epNoSeason.setdefault((d['title']).title(), {}).setdefault(d['episode'], set()).add(f)
                     else:
-                        print(d)
-                        print(f)
                         epNoEpisode.setdefault((d['title']).title(), set()).add(f)
+    print('Moving files to nicely structured folders in ' + dest)
+    if not os.path.exists(dest):
+        os.makedirs(dest)
     episodePath = dest + '/Shows'
     moviePath = dest + '/Movies'
     if not os.path.exists(episodePath):
@@ -50,11 +51,10 @@ def clean(path, dest):
             os.makedirs(moviePath)
 
     for i in epNoEpisode:
-        print(i)
         for k in epNoEpisode[i]:
-            if not os.path.exists(dest + '/Undefined' + k[4:len(k)]):
-                os.makedirs(dest + '/Undefined/' + k[4:len(k)])
-            shutil.copy(k, dest + '/Undefined/' + k[4:len(k)])
+            if not os.path.exists(dest + '/Undefined From ' + k):
+                os.makedirs(dest + '/Undefined From ' + k)
+            shutil.copy(k, dest + '/Undefined From ' + k)
 
     for i in epNoSeason:
         if not os.path.exists(episodePath+'/'+i):
@@ -76,5 +76,5 @@ def clean(path, dest):
         if not os.path.exists(moviePath+'/'+i):
             os.makedirs(moviePath+'/'+i)
         shutil.copy(m[i][0], moviePath+'/'+i)
-
-print (clean('downloads','downloads1'))
+    print('All files moved to '+ dest +', movies are in Movies folder, shows in Shows folder and files we couldnt guess are in the Undefined folder.')
+print (clean('downloads','NewFolder'))
