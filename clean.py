@@ -19,6 +19,8 @@ def clean(path, dest):
     epFullDetails = {}
     # e = { 'episode title' : { 'episode number': [ [ episode path] ]
     epNoSeason = {}
+    # e = { 'episode title' : { 'season': [ [ episode path]
+    epNoEpisode = {}
     # m = { 'movie title' : [ [ 'title', path ] ] } -
     m = {}
     s = set()
@@ -31,36 +33,29 @@ def clean(path, dest):
                 if d['type'] == 'movie':
                     m.setdefault((d['title']).title(), []).append(f)
                 elif d['type'] == 'episode':
-                    if 'episode' in d: #checkar hvort það fann episode í guessit outputtinu ef ekki bara ignore for now þarf að laga
+                    if 'episode' in d:
                         if not d.get('season', None) == None:
                             epFullDetails.setdefault((d['title']).title(), {}).setdefault(d['season'], set()).add((d['episode'], f))
                         else:
                             epNoSeason.setdefault((d['title']).title(), {}).setdefault(d['episode'], set()).add(f)
-
-                '''if not re.search('((s|S)[0-9]+(e|E)[0-9]+)', f):
-                    print()
-                    print(os.path.join(root, file))'''
-
-                '''if re.search("[a-z]", f):
-                    g = re.split('(\/)', f)
-                    print (len(g))
-                    print('split')
-                    for i in g:
-                        print (i)'''
-
-                #print(dest)
-                #shutil.move(f, dest)
-                #with open(os.path.join(root, file), 'r') as f:
-                    #for l in f:
-                        #print(l)
-                        #shutil.move(l, dest+ '/'+ path)
-
+                    else:
+                        print(d)
+                        print(f)
+                        epNoEpisode.setdefault((d['title']).title(), set()).add(f)
     episodePath = dest + '/Shows'
     moviePath = dest + '/Movies'
     if not os.path.exists(episodePath):
             os.makedirs(episodePath)
     if not os.path.exists(moviePath):
             os.makedirs(moviePath)
+
+    for i in epNoEpisode:
+        print(i)
+        for k in epNoEpisode[i]:
+            if not os.path.exists(dest + '/Undefined' + k[4:len(k)]):
+                os.makedirs(dest + '/Undefined/' + k[4:len(k)])
+            shutil.copy(k, dest + '/Undefined/' + k[4:len(k)])
+
     for i in epNoSeason:
         if not os.path.exists(episodePath+'/'+i):
             os.makedirs(episodePath+'/' + i + '/Undefined')
