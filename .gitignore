@@ -10,12 +10,15 @@ __pycache__/
 .Python
 env/
 build/
+test.py
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
 lib/
+.DS_Store
+.DS_Store/
 lib64/
 parts/
 sdist/
