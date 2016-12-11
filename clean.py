@@ -1,6 +1,7 @@
 import os
 import shutil
 import sys
+import re
 from guessit import guessit
 
 path = sys.argv[1]
@@ -15,12 +16,21 @@ epNoEpisode = {}
 # m = { 'movie title' : [ [ 'title', path ] ] } -
 m = {}
 s = set()
+episodesFound = set()
+delete = []
+otherFiles = []
 print('Guessing titles, episode names etc....')
 for root, dirs, files in os.walk(path):
     for file in files:
-        if file.endswith(".avi") or file.endswith('.mp4') or file.endswith('.mkv') or file.endswith('.mpeg4') or file.endswith('.m4v'):
+        f = os.path.join(root, file)
+        if re.search('((s|S)(a|A)(m|M)(p|P)(l|L)(e|E))', file):
+            delete.append(f)
+            break
+        elif file.endswith(".avi") or file.endswith('.mp4') or file.endswith('.mkv') or file.endswith('.mpeg4') or file.endswith('.m4v') or file.endswith('.srt') or file.endswith('.sub') or file.endswith('.sbv'):
             f = os.path.join(root, file)
+            #print (f)
             d = guessit(f)
+            print(d)
             if d['type'] == 'movie':
                 m.setdefault((d['title']).title(), []).append(f)
             elif d['type'] == 'episode':
@@ -30,7 +40,32 @@ for root, dirs, files in os.walk(path):
                     else:
                         epNoSeason.setdefault((d['title']).title(), {}).setdefault(d['episode'], set()).add(f)
                 else:
-                    epNoEpisode.setdefault((d['title']).title(), set()).add(f)
+                    if not file.startswith('.'):
+                        epNoEpisode.setdefault((d['title']).title(), set()).add(f)
+        else:
+            otherFiles.append(f)
+
+print('List of all episodes Found')
+for i in epFullDetails:
+    print(i)
+for i in epNoSeason:
+    print(i)
+for i in epNoEpisode:
+    print(i)
+
+
+print ()
+print('other files')
+for i in otherFiles:
+    print(i)
+
+print ()
+print('delete files')
+for i in delete:
+    print(i)
+
+print (m)
+
 print('Moving files to nicely structured folders in ' + dest)
 if not os.path.exists(dest):
     os.makedirs(dest)
@@ -68,3 +103,7 @@ for i in m:
         os.makedirs(moviePath+'/'+i)
     shutil.copy(m[i][0], moviePath+'/'+i)
 print('All files moved to '+ dest +', movies are in Movies folder, shows in Shows folder and files we couldnt guess are in the Undefined folder.')
+
+
+
+print (clean('test', 'downloads1'))
