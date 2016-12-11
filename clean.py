@@ -5,9 +5,24 @@ import re
 from guessit import guessit
 import datetime
 
-path = 'downloads 8'
-dest = 'TestFolder'
+path = sys.argv[1]
+dest = sys.argv[2]
 
+type = 'A'
+if len(sys.argv) > 3:
+    type = sys.argv[3]
+
+if not (type == 'A' or type == 'M' or type == 'T' or type == 'Mu'):
+    print('Flag #3 is not defined correctly please read the readme')
+    exit()
+
+hard = 'S'
+if len(sys.argv) > 4:
+    hard = sys.argv[4]
+
+if not (hard == 'S' or hard == 'H'):
+    print('Flag #4 is not defined correctly please read the readme')
+    exit()
 
 if not os.path.isdir(path):
     print ('Path ' + path + ' is not an existing path on this computer')
@@ -63,7 +78,7 @@ for root, dirs, files in os.walk(path):
             f = os.path.join(root, file)
             d = guessit(f)
 
-            if d['type'] == 'movie':
+            if d['type'] == 'movie' and (type == 'M' or type == 'A'):
                 if not d.get('title', None) == None:
 
                     if d.get('year', None) == None:
@@ -77,7 +92,7 @@ for root, dirs, files in os.walk(path):
                     moviesUndefined.append((f))
                 removeFolder.add(root)
 
-            elif d['type'] == 'episode':
+            elif d['type'] == 'episode' and (type == 'T' or type == 'A'):
                 if 'title' in d:
                     if not d.get('season', None) == None:
                         epFullDetails.setdefault((d['title']).title(), {}).setdefault(d['season'], []).append((f))
@@ -89,10 +104,10 @@ for root, dirs, files in os.walk(path):
                     if not file.startswith('.'):
                         epUndefined.append(f)
                         removeFolder.add(root)
-        elif file.endswith('mp3'):
+        elif file.endswith('mp3') and (type == 'A' or type == 'Mu'):
             music.append(f)
             removeFolder.add(root)
-        else:
+        elif hard == 'H':
             otherFiles.append(f)
 
 #Print out all found TV shows and episodes
@@ -110,7 +125,6 @@ if len(epFullDetails) > 0 or len(epNoSeason) > 0:
         for j in epNoSeason.get(i, []):
             print('\t\t' + str(j.split('/')[-1]))
 
-    #TODO prompt user for correcting name of TV Show
 else:
     print('None')
 
@@ -154,7 +168,8 @@ for i in epNoSeason:
             except Exception as e:
                 print(e)
         else:
-            os.remove(s)
+            if not s == path:
+                os.remove(s)
 
 for i in epFullDetails:
     if not os.path.exists(episodePath+'/'+i):
@@ -171,7 +186,8 @@ for i in epFullDetails:
                 except Exception as e:
                     print(e)
             else:
-                os.remove(s)
+                if not s == path:
+                    os.remove(s)
 
 for i in movies:
     if not os.path.exists(moviePath+'/'+i):
@@ -185,7 +201,8 @@ for i in movies:
             except Exception as e:
                 print(e)
         else:
-            os.remove(j[0])
+            if not j[0] == path:
+                os.remove(j[0])
 
 for i in music:
     if not os.path.exists(musicPath +'/'+i):
@@ -198,7 +215,8 @@ for i in music:
         except Exception as e:
             print(e)
     else:
-        os.remove(i)
+        if not i == path:
+            os.remove(i)
 
 
 
@@ -224,21 +242,22 @@ else:
     for i in episodesFound:
         file.write(i + '\n')
         for j in epFullDetails.get(i, []):
-            file.write('\tSeason ' + str(j))
+            file.write('\tSeason ' + str(j) + '\n')
             for k in epFullDetails[i][j]:
-                file.write('\t\t'+ str(k.split('/')[-1]))
+                file.write('\t\t'+ str(k.split('/')[-1]) + '\n')
 
         if not len(epNoSeason.get(i, [])) == 0:
-            file.write('\tUndefined')
+            file.write('\tUndefined\n')
         for j in epNoSeason.get(i, []):
-            file.write('\t\t' + str(j.split('/')[-1]))
+            file.write('\t\t' + str(j.split('/')[-1]) + '\n')
+
 
 file.write('\nMovies added:' + '\n')
 if len(movies) == 0:
-    file.write('None' + '\n')
+    file.write('\tNone' + '\n')
 else:
     for i in movies:
-        file.write(i + '\n')
+        file.write('\t' + i + '\n')
 
 file.write('\nMusic added:' + '\n')
 if len(music) == 0:
@@ -257,6 +276,7 @@ for i in otherFiles:
 
 for i in removeFolder:
     try:
-        os.removedirs(i)
+        if not i == path:
+            os.removedirs(i)
     except:
         var = 'Do nothing'
