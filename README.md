@@ -19,4 +19,4 @@ Við gerðum ráð fyrir á í viðkomandi folder sé bara til þess að geyma k
 
 Ef skráin er þegar til í dest folder þá eyðum við skránni úr path folder
 
-Ef skrá sem var færð var í folder er akkúrat þeim folder eytt Það þýðir þó ekki að allar
+Ef skrá sem var færð var í folder er akkúrat þeim folder eytt, Það þýðir þó ekki að öllum folder-um verði eytt. Þar sem eingöngu folderar sem inniheldu skrár sem voru færð eða eytt verða eytt.
